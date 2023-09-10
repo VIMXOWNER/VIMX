@@ -1,0 +1,325 @@
+local Library = loadstring(game:HttpGet("https://pastebin.com/raw/vff1bQ9F"))()
+local Window = Library.CreateLib("VIM X", "Synapse")
+
+-- Tabs/Sections 1/4
+
+local Tab1 = Window:NewTab("Blatant")
+local Tab1Section = Tab1:NewSection("Blatant")
+
+-- Buttons/For/Blatant
+
+Tab1Section:NewButton("Big Hitboxes", "Really Big HitBoxes", function()
+    _G.HeadSize = 100
+_G.Disabled = true
+ 
+game:GetService('RunService').RenderStepped:connect(function()
+if _G.Disabled then
+for i,v in next, game:GetService('Players'):GetPlayers() do
+if v.Name ~= game:GetService('Players').LocalPlayer.Name then
+pcall(function()
+v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize,_G.HeadSize,_G.HeadSize)
+v.Character.HumanoidRootPart.Transparency = 0.7
+v.Character.HumanoidRootPart.BrickColor = BrickColor.new("Really blue")
+v.Character.HumanoidRootPart.Material = "Neon"
+v.Character.HumanoidRootPart.CanCollide = false
+end)
+end
+end
+end
+end)
+end)
+
+
+
+Tab1Section:NewButton("Infinte Jumps", "Activates Infinte Jumps", function()
+local InfiniteJumpEnabled = true
+game:GetService("UserInputService").JumpRequest:connect(function()
+	if InfiniteJumpEnabled then
+		game:GetService"Players".LocalPlayer.Character:FindFirstChildOfClass'Humanoid':ChangeState("Jumping")
+	end
+end)
+end)
+
+
+
+Tab1Section:NewButton("Speed", "WalkSpeed Changer", function()
+-- Get the Players service
+local Players = game:GetService("Players")
+ 
+-- Create a ScreenGui for the UI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ 
+-- Create a TextBox for entering the walk speed
+local textBox = Instance.new("TextBox")
+textBox.Size = UDim2.new(0.2, 0, 0.1, 0)
+textBox.Position = UDim2.new(0.8, 0, 0.45, 0)
+textBox.Parent = screenGui
+textBox.PlaceholderText = "Enter Walk Speed..."
+textBox.AnchorPoint = Vector2.new(1, 0.5) -- Anchor to the right-middle
+ 
+-- Create a function to change the walk speed
+local function changeWalkSpeed(newSpeed)
+    local player = game.Players.LocalPlayer
+ 
+    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+        -- Check if the player's character exists
+        local humanoid = player.Character.Humanoid
+        humanoid.WalkSpeed = newSpeed
+    end
+end
+ 
+-- Create a function to display a notification
+local function notifyPlayer(message)
+    local notification = Instance.new("TextLabel")
+    notification.Size = UDim2.new(0.3, 0, 0.1, 0)
+    notification.Position = UDim2.new(0.85, 0, 0.85, 0)
+    notification.Parent = screenGui
+    notification.Text = message
+    notification.BackgroundTransparency = 1
+    notification.TextColor3 = Color3.new(1, 1, 1)
+    notification.TextStrokeTransparency = 0.5
+    notification.FontSize = Enum.FontSize.Size24
+    notification.AnchorPoint = Vector2.new(1, 1) -- Anchor to the right-middle
+ 
+    -- Remove the notification after a few seconds
+    wait(5)
+    notification:Destroy()
+end
+ 
+-- Function to handle button click
+textBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local newSpeed = tonumber(textBox.Text)
+ 
+        if newSpeed then
+            -- Call the changeWalkSpeed function with the new speed
+            changeWalkSpeed(newSpeed)
+ 
+            -- Notify the player
+            notifyPlayer("Walk Speed Changed")
+        else
+            -- Show an error message if the input is not a number
+            textBox.Text = "Invalid input"
+        end
+    end
+end)
+end)
+
+-- Tabs/Sections 2/4
+
+local Tab2 = Window:NewTab("Visual")
+local Tab2Section = Tab2:NewSection("Visual")
+
+Tab2Section:NewButton("NameTags", "Shows Everyones Names", function()
+local c = workspace.CurrentCamera
+local ps = game:GetService("Players")
+local lp = ps.LocalPlayer
+local rs = game:GetService("RunService")
+
+local function esp(p,cr)
+    local h = cr:WaitForChild("Humanoid")
+    local hrp = cr:WaitForChild("HumanoidRootPart")
+
+    local text = Drawing.new("Text")
+    text.Visible = false
+    text.Center = true
+    text.Outline = true 
+    text.Font = 2
+    text.Color = Color3.fromRGB(255,255,255)
+    text.Size = 13
+
+    local c1
+    local c2
+    local c3
+
+    local function dc()
+        text.Visible = false
+        text:Remove()
+        if c1 then
+            c1:Disconnect()
+            c1 = nil 
+        end
+        if c2 then
+            c2:Disconnect()
+            c2 = nil 
+        end
+        if c3 then
+            c3:Disconnect()
+            c3 = nil 
+        end
+    end
+
+    c2 = cr.AncestryChanged:Connect(function(_,parent)
+        if not parent then
+            dc()
+        end
+    end)
+
+    c3 = h.HealthChanged:Connect(function(v)
+        if (v<=0) or (h:GetState() == Enum.HumanoidStateType.Dead) then
+            dc()
+        end
+    end)
+
+    c1 = rs.RenderStepped:Connect(function()
+        local hrp_pos,hrp_onscreen = c:WorldToViewportPoint(hrp.Position)
+        if hrp_onscreen then
+            text.Position = Vector2.new(hrp_pos.X, hrp_pos.Y)
+            text.Text = p.Name
+            text.Visible = true
+        else
+            text.Visible = false
+        end
+    end)
+end
+
+local function p_added(p)
+    if p.Character then
+        esp(p,p.Character)
+    end
+    p.CharacterAdded:Connect(function(cr)
+        esp(p,cr)
+    end)
+end
+
+for i,p in next, ps:GetPlayers() do 
+    if p ~= lp then
+        p_added(p)
+    end
+end
+
+ps.PlayerAdded:Connect(p_added)
+end)
+
+Tab2Section:NewButton("PlayerESP", "Shows Where Everyone Is", function()
+--// Universal Box ESP (Works on Arsenal and other games)
+
+-- settings
+local settings = {
+   defaultcolor = Color3.fromRGB(255,0,0),
+   teamcheck = false,
+   teamcolor = true
+};
+
+-- services
+local runService = game:GetService("RunService");
+local players = game:GetService("Players");
+
+-- variables
+local localPlayer = players.LocalPlayer;
+local camera = workspace.CurrentCamera;
+
+-- functions
+local newVector2, newColor3, newDrawing = Vector2.new, Color3.new, Drawing.new;
+local tan, rad = math.tan, math.rad;
+local round = function(...) local a = {}; for i,v in next, table.pack(...) do a[i] = math.round(v); end return unpack(a); end;
+local wtvp = function(...) local a, b = camera.WorldToViewportPoint(camera, ...) return newVector2(a.X, a.Y), b, a.Z end;
+
+local espCache = {};
+local function createEsp(player)
+   local drawings = {};
+   
+   drawings.box = newDrawing("Square");
+   drawings.box.Thickness = 1;
+   drawings.box.Filled = false;
+   drawings.box.Color = settings.defaultcolor;
+   drawings.box.Visible = false;
+   drawings.box.ZIndex = 2;
+
+   drawings.boxoutline = newDrawing("Square");
+   drawings.boxoutline.Thickness = 3;
+   drawings.boxoutline.Filled = false;
+   drawings.boxoutline.Color = newColor3();
+   drawings.boxoutline.Visible = false;
+   drawings.boxoutline.ZIndex = 1;
+
+   espCache[player] = drawings;
+end
+
+local function removeEsp(player)
+   if rawget(espCache, player) then
+       for _, drawing in next, espCache[player] do
+           drawing:Remove();
+       end
+       espCache[player] = nil;
+   end
+end
+
+local function updateEsp(player, esp)
+   local character = player and player.Character;
+   if character then
+       local cframe = character:GetModelCFrame();
+       local position, visible, depth = wtvp(cframe.Position);
+       esp.box.Visible = visible;
+       esp.boxoutline.Visible = visible;
+
+       if cframe and visible then
+           local scaleFactor = 1 / (depth * tan(rad(camera.FieldOfView / 2)) * 2) * 1000;
+           local width, height = round(4 * scaleFactor, 5 * scaleFactor);
+           local x, y = round(position.X, position.Y);
+
+           esp.box.Size = newVector2(width, height);
+           esp.box.Position = newVector2(round(x - width / 2, y - height / 2));
+           esp.box.Color = settings.teamcolor and player.TeamColor.Color or settings.defaultcolor;
+
+           esp.boxoutline.Size = esp.box.Size;
+           esp.boxoutline.Position = esp.box.Position;
+       end
+   else
+       esp.box.Visible = false;
+       esp.boxoutline.Visible = false;
+   end
+end
+
+-- main
+for _, player in next, players:GetPlayers() do
+   if player ~= localPlayer then
+       createEsp(player);
+   end
+end
+
+players.PlayerAdded:Connect(function(player)
+   createEsp(player);
+end);
+
+players.PlayerRemoving:Connect(function(player)
+   removeEsp(player);
+end)
+
+runService:BindToRenderStep("esp", Enum.RenderPriority.Camera.Value, function()
+   for player, drawings in next, espCache do
+       if settings.teamcheck and player.Team == localPlayer.Team then
+           continue;
+       end
+
+       if drawings and player ~= localPlayer then
+           updateEsp(player, drawings);
+       end
+   end
+end)
+end)
+
+-- Tabs/Sections 3/4
+
+local Tab3 = Window:NewTab("OP")
+local Tab3Section = Tab3:NewSection("OverPowered")
+
+Tab3Section:NewButton("Fly", "Fly Script", function()
+loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")()
+end)
+
+Tab3Section:NewButton("MobileCursor Script", "Gives You A PC Cursor On Mobile", function()
+loadstring(game:HttpGet(('https://pastefy.ga/V75mqzaz/raw'),true))()
+end)
+
+local Tab4 = Window:NewTab("Other")
+local Tab4Section = Tab4:NewSection("Other")
+
+Tab4Section:NewButton("Keyboard", "MobileKeyboard Script", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt", true))()
+end)
+
+Tab4Section:NewButton("FPSBooster", "Boosts Your FPS", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/CasperFlyModz/discord.gg-rips/main/FPSBooster.lua"))()
+end)
